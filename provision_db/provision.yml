@@ -11,8 +11,8 @@
     - name: "Bootstrapping System For Ansible Use"
       raw: '{{ pre_task }}'
 
-- import_playbook: includes/prepare.yml
-- import_playbook: includes/install.yml
-- import_playbook: includes/cluster.yml
+- import_playbook: includes/server-ids.yml
+- import_playbook: includes/db-config.yml
+- import_playbook: includes/init-cluster.yml
 - import_playbook: includes/validate.yml
 - import_playbook: includes/maxscale.yml

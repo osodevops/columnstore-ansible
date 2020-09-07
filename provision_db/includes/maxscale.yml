@@ -8,10 +8,35 @@
 
   tasks:
 
+  - name: "Installing MaxScale Items"
+    package:
+      name: '{{ packages }}'
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+        - '{{ maxscale }}'
+        - '{{ mariadb_client }}'
+
   - name: "Copy MaxScale Static Config"
     template:
       src: ../templates/maxscale.cnf.j2
       dest: /etc/maxscale.cnf
+
+  - name: "Stop Columnstore API"
+    systemd:
+      state: stopped
+      name: mariadb-columnstore-cmapi
+
+  - name: "Stop MariaDB Columnstore"
+    systemd:
+      state: stopped
+      name: mariadb-columnstore
+
+  - name: "Stop MariaDB"
+    systemd:
+      state: stopped
+      name: mariadb
 
   - name: "Restart MaxScale"
     systemd:
@@ -27,6 +52,7 @@
       user: admin
       password: mariadb
       status_code: 204
+    failed_when: false
     loop:
        - {"name": "pm1", "host": "{{ hostvars.pm1.ansible_host }}"}
        - {"name": "pm2", "host": "{{ hostvars.pm2.ansible_host }}"}
@@ -41,6 +67,7 @@
       user: admin
       password: mariadb
       status_code: 204
+    failed_when: false
 
   - name: "Adding Router To MaxScale"
     uri:
@@ -51,6 +78,7 @@
       user: admin
       password: mariadb
       status_code: 204
+    failed_when: false
 
   - name: "Adding Listener To MaxScale"
     uri:
@@ -61,3 +89,4 @@
       user: admin
       password: mariadb
       status_code: 204
+    failed_when: false

@@ -1,0 +1,43 @@
+- hosts: "pm1"
+  become: yes
+  become_user: root
+  vars_files:
+    - '../inventory/group_vars/distro/{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}.yml'
+
+  tasks:
+  - name: "Adding Second Node To ColumnStore Cluster"
+    uri:
+      url: https://{{ hostvars.pm1.ansible_host }}:8640/cmapi/0.4.0/cluster/add-node
+      method: PUT
+      headers:
+        Content-Type: application/json
+        x-api-key: "{{ api_key }}"
+      validate_certs: no
+      return_content: yes
+      status_code: 200
+      body_format: jsonc
+      body: {"timeout": 60, "node": "{{ hostvars.pm2.ansible_host }}"}
+      timeout: 60
+    failed_when: false
+
+  - name: "Adding Third Node To ColumnStore Cluster"
+    uri:
+      url: https://{{ hostvars.pm1.ansible_host }}:8640/cmapi/0.4.0/cluster/add-node
+      method: PUT
+      headers:
+        Content-Type: application/json
+        x-api-key: "{{ api_key }}"
+      validate_certs: no
+      return_content: yes
+      status_code: 200
+      body_format: json
+      body: {"timeout": 60, "node": "{{ hostvars.pm3.ansible_host }}"}
+      timeout: 60
+    failed_when: false
+
+  - name: "Run DBBuilder Now If Storagemanager Is Active"
+    shell: /usr/bin/dbbuilder 7
+    when: use_s3 == true
+
+  - name: "Waiting For Cluster To Initialize"
+    shell: sleep 15
