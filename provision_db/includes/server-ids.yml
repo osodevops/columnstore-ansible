@@ -1,0 +1,24 @@
+---
+
+- hosts: "all"
+  become: yes
+  become_user: root
+  vars_files:
+    - '../inventory/group_vars/distro/{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}.yml'
+
+  tasks:
+  - name: "Adding Custom Mappings To /etc/hosts"
+    blockinfile:
+      path: /etc/hosts
+      block: |
+        {{ hostvars['pm1'].ansible_host }} pm1
+        {{ hostvars['pm2'].ansible_host }} pm2
+        {{ hostvars['pm3'].ansible_host }} pm3
+        {{ hostvars['mx1'].ansible_host }} mx1
+
+  - name: "Setting Server IDs"
+    replace:
+      path: '{{ columnstore_cnf }}'
+      regexp: '^#server-id.*$'
+      replace: "server-id = {{ groups['maria'].index(inventory_hostname)|int + 1 }}"
+

@@ -7,7 +7,6 @@
     - '../inventory/group_vars/distro/{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}.yml'
 
   tasks:
-
   - name: "Copying Sample Data To Server"
     copy:
       src: ../templates/cs_validation.sql
@@ -28,7 +27,6 @@
     - '../inventory/group_vars/distro/{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}.yml'
 
   tasks:
-
   - name: "Validating Cluster"
     shell: mariadb -sN -e "SELECT id FROM cs_validation.mock_data ORDER BY id DESC LIMIT 1;"
     register: mariadb_result
