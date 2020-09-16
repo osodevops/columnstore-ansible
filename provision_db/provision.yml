@@ -1,11 +1,11 @@
 ---
-
 - hosts: "all"
   become: yes
   become_user: root
   gather_facts: yes
   vars_files:
     - 'inventory/group_vars/distro/{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}.yml'
+    - 'inventory/group_vars/all.yml'
 
   pre_tasks:
     - name: "Bootstrapping System For Ansible Use"
@@ -14,5 +14,4 @@
 - import_playbook: includes/server-ids.yml
 - import_playbook: includes/db-config.yml
 - import_playbook: includes/init-cluster.yml
-- import_playbook: includes/validate.yml
 - import_playbook: includes/maxscale.yml

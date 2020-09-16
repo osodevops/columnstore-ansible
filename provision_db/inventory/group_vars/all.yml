@@ -1,23 +1,16 @@
 ---
-# Version Configuration
-mariadb_version: 10.5
-maxscale_version: 2.5
-
-# MariaDB Enterprise Token
-enterprise_token:
-
 # Columnstore CMAPI key
-api_key: 
+api_key: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/api-key', region='eu-west-2', decrypt=true ) }}"
 
 # Database Credentials
-admin_pass: DemoPassword1~
-admin_user: admin
-cej_pass: DemoPassword1~
-cej_user: cej
-maxscale_user: maxscale
-maxscale_pass: DemoPassword1~
-repli_pass: DemoPassword1~
-repli_user: replica
+admin_pass: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/admin-pass', region='eu-west-2', decrypt=true ) }}"
+admin_user: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/admin-user', region='eu-west-2', decrypt=true ) }}"
+cej_pass: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/cej-pass', region='eu-west-2', decrypt=true ) }}"
+cej_user: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/cej-user', region='eu-west-2', decrypt=true ) }}"
+maxscale_user: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/maxscale-user', region='eu-west-2', decrypt=true ) }}"
+maxscale_pass: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/maxscale-pass', region='eu-west-2', decrypt=true ) }}"
+repli_pass: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/replica-pass', region='eu-west-2', decrypt=true ) }}"
+repli_user: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/replica-user', region='eu-west-2', decrypt=true ) }}"
 
 # Storage Manager Configuration
 use_s3: false

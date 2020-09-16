@@ -1,7 +1,6 @@
 pipeline {
     agent { label 'master' }
     parameters {
-        string(name: 'enterpriseToken', defaultValue: '', description: 'The MariaDB Enterprise token required to build')
         booleanParam(name: 'buildAMI', defaultValue: false, description: 'Build AMI (Packer)')
         booleanParam(name: 'provisionServers', defaultValue: false, description: 'Run Ansible Playbook')
     }
@@ -15,11 +14,9 @@ pipeline {
                     COMMIT = env.GIT_COMMIT
                     sh "packer validate " +
                         "-var \'COMMIT=${COMMIT}\' " +
-                        "-var \'TOKEN=${enterpriseToken}\' " +
                         "packer.json"
                     sh "packer build " +
                         "-var \'COMMIT=${COMMIT}\' " +
-                        "-var \'TOKEN=${enterpriseToken}\' " +
                         "packer.json"
                 }
             }
