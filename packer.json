@@ -5,6 +5,7 @@
   },
   "builders": [{
     "type": "amazon-ebs",
+    "iam_instance_profile": "jenkins_ssm_instance_profile",
     "profile": "default",
     "region": "eu-west-2",
     "source_ami": "ami-0287acb18b6d8efff",
@@ -31,10 +32,6 @@
       "playbook_file": "ansible/provision.yml",
       "role_paths": [
         "ansible/roles/mariadb"
-      ],
-      "extra_arguments": [
-        "--extra-vars",
-        "enterprise_token={{ user `TOKEN` }}"
       ]
     }
   ]

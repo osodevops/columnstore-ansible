@@ -223,3 +223,11 @@
         enabled: yes
       tags:
         - db-config
+        -
+    - name: "Configuring Storagemanager"
+      template:
+        src: ../../templates/storagemanager.cnf.j2
+        dest: /etc/columnstore/storagemanager.cnf
+        owner: mysql
+        group: mysql
+      when: use_s3 == true

@@ -1,5 +1,4 @@
 ---
-
 columnstore_cnf: /etc/mysql/mariadb.conf.d/columnstore.cnf
 git: git
 htop: htop
