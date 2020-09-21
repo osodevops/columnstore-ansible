@@ -2,29 +2,17 @@
 - name: Include OS-specific variables.
   include_vars: "all.yml"
 
-- name: Include OS-specific variables.
-  include_vars: "{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}.yml"
-
 - name: "Disabling AppArmor (Ubuntu)"
   systemd:
     name: apparmor
     state: stopped
     enabled: no
-  when: ansible_distribution == 'Ubuntu'
 
 - name: "Disabling UFW (Ubuntu)"
   systemd:
     name: ufw
     state: stopped
     enabled: no
-  when: ansible_distribution == 'Ubuntu'
-
-- name: "Upgrading All Packages (Ubuntu)"
-  apt:
-    name: '*'
-    state: latest
-    update_cache: yes
-  when: ansible_distribution == 'Ubuntu'
 
 - name: "Installing Some Prerequisites"
   package:
@@ -32,13 +20,13 @@
     state: present
   vars:
     packages:
-    - '{{ git }}'
-    - '{{ htop }}'
-    - '{{ jemalloc }}'
-    - '{{ jq }}'
-    - '{{ mlocate }}'
-    - '{{ nano }}'
-    - '{{ wget }}'
+    - git
+    - htop
+    - libjemalloc1
+    - jq
+    - mlocate
+    - wget
+    - awscli
 
 - name: "Setting System Character Set"
   command: localedef -i en_US -f UTF-8 en_US.UTF-8
@@ -99,7 +87,7 @@
 
 - name: "Removing Conflicts"
   package:
-    name: '{{ mariadb_libs }}'
+    name: mariadb-libs
     state: absent
 
 - name: "Getting MariaDB Enterprise Repo Setup Script"
@@ -108,13 +96,8 @@
     dest: /usr/local/bin/mariadb_es_repo_setup
     mode: 'a+x'
 
-- name: "Removing Previous MariaDB Yum Repo If Necessary"
-  command: rm -rf /etc/yum.repos.d/mariadb*
-  when: ansible_os_family == 'RedHat'
-
 - name: "Removing Previous MariaDB Apt Repo If Necessary"
   command: rm -rf /etc/apt/sources.list.d/mariadb*
-  when: ansible_os_family == 'Debian'
 
 - name: "Setting Up MariaDB Enterprise Repo"
   command: /usr/local/bin/mariadb_es_repo_setup --token={{ enterprise_token }} --skip-tools --mariadb-server-version='{{ mariadb_version }}' --mariadb-maxscale-version='{{ maxscale_version }}' --apply
@@ -131,23 +114,6 @@
     dest: /opt/cmapi
     remote_src: yes
 
-- name: "Installing MariaDB Items"
-  package:
-    name: '{{ packages }}'
-    state: present
-    update_cache: yes
-  vars:
-    packages:
-    - '{{ mariadb_server }}'
-    - '{{ mariadb_cs_engine }}'
-    - '{{ mariadb_backup }}'
-
-- name: "Change MariaDB binding"
-  lineinfile:
-    path: '/etc/mysql/mariadb.conf.d/50-server.cnf'
-    regexp: '127.0.0.1'
-    line: "#bind_address = 0.0.0.0"
-
 - name: "Checking If CMAPI Is Already Installed"
   stat:
     path: /etc/systemd/system/mariadb-columnstore-cmapi.service
@@ -159,9 +125,48 @@
     chdir: /opt/cmapi
   when: not stat_result.stat.exists
 
+- name: "Installing MariaDB Items"
+  package:
+    name: '{{ packages }}'
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - mariadb-server
+    - mariadb-plugin-columnstore
+    - mariadb-backup
+    - mariadb-client
+    - maxscale
+
+- name: "Disabling MariaDB Server"
+  systemd:
+    name: mariadb
+    enabled: no
+
+- name: "Disabling Columnstore Engine"
+  systemd:
+    name: mariadb-columnstore
+    enabled: no
+
+- name: "Disabling CMAPI Server"
+  systemd:
+    name: mariadb-columnstore-cmapi
+    enabled: no
+
+- name: "Disabling MaxScale"
+  systemd:
+    name: maxscale
+    enabled: no
+
+- name: "Change MariaDB binding"
+  lineinfile:
+    path: '/etc/mysql/mariadb.conf.d/50-server.cnf'
+    regexp: '127.0.0.1'
+    line: "#bind_address = 0.0.0.0"
+
 - name: "Configuring columnstore.cnf"
   blockinfile:
-   path: '{{ columnstore_cnf }}'
+   path: /etc/mysql/mariadb.conf.d/columnstore.cnf
    block: |
      character_set_server = utf8
      collation_server = utf8_general_ci
@@ -173,3 +178,6 @@
      gtid_strict_mode = ON
      log_error = /var/log/mariadb/columnstore/mariadb-error.log
      columnstore_use_import_for_batchinsert=ALWAYS
+
+- name: download 'GOAT'
+  get_url: url={{ goat_deb }} dest=/home/ubuntu/goat.deb
