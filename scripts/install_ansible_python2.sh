@@ -1,4 +1,3 @@
  #!/bin/bash -eux
-sudo apt update -y
-sudo apt-add-repository --yes --update ppa:ansible/ansible
-sudo apt install ansible python-boto3 -y
+sudo rm /var/lib/apt/lists/lock
+sudo apt install python-boto3 unzip -y

@@ -5,3 +5,6 @@ maxscale_version: 2.5
 
 # MariaDB Enterprise Token
 enterprise_token: "{{ lookup('aws_ssm', '/production/mariadb-columnstore/enterprise-token', region='eu-west-2', decrypt=true ) }}"
+
+# 'Steamhaus/GOAT' - used for dynamically mounting EBS volumes
+goat_deb: "https://github.com/steamhaus/goat/releases/download/v1.0.4/goat_1.0.37g114218b-2_amd64.deb"
