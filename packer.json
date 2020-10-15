@@ -5,10 +5,20 @@
   },
   "builders": [{
     "type": "amazon-ebs",
-    "iam_instance_profile": "jenkins_ssm_instance_profile",
+    "iam_instance_profile": "CODEBUILD-PACKER-IAM-PROFILE",
     "profile": "default",
     "region": "eu-west-2",
-    "source_ami": "ami-0491c6f11326194ad",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "UBUNTU-BASE-*",
+        "root-device-type": "ebs"
+      },
+      "owners": [
+        "self"
+      ],
+      "most_recent": true
+    },
     "vpc_id": "vpc-04332eb29585921e1",
     "subnet_id": "subnet-0fbdf398ee3dc6f0d",
     "instance_type": "t3a.large",
@@ -25,7 +35,7 @@
   "provisioners": [
     {
       "type": "shell",
-      "script": "scripts/install_ansible_python2.sh"
+      "script": "scripts/release_apt.sh"
     },
     {
       "type": "ansible-local",
@@ -34,6 +44,13 @@
         "ansible/roles/mariadb"
       ],
       "extra_arguments": [ "-vvvv" ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo systemctl enable apt-daily.timer",
+        "sudo systemctl enable apt-daily-upgrade.timer"
+      ]
     }
   ]
 }

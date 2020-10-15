@@ -1,3 +1,5 @@
+mariadb/ansible/roles/mariadb/files/data
+ansible/roles/mariadb/files/
 .DS_Store
 .idea
 .pem
