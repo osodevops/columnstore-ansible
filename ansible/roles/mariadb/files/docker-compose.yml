@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  mariadb-columnstore-db:
+    image: mariadb:latest
+#    image: mariadb/columnstore
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+
+volumes:
+  dbdata:
+    driver: local
